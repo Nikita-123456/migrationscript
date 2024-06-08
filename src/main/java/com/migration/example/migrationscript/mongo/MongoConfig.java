@@ -1,4 +1,4 @@
-package com.migration.example.migrationscript;
+package com.migration.example.migrationscript.mongo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
