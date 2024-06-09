@@ -2,6 +2,7 @@ package com.migration.example.migrationscript;
 
 import com.migration.example.migrationscript.mongo.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +11,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -30,6 +33,7 @@ public class UserController {
 
     @GetMapping("/fetchGameData")
     public void fetchGameData() {
+        long startTime = System.currentTimeMillis();
 
         URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
         String directoryPath = null;
@@ -40,7 +44,6 @@ public class UserController {
         }
 
         if (directoryPath != null) {
-            // Define the filename
             String filename = "userids.txt";
 
             // Combine directory path and filename to get the full file path
@@ -51,7 +54,7 @@ public class UserController {
             // Loop until no user IDs are found
             while (true) {
                 // Read user IDs from the file
-                List<Integer> userIds = userService.readUserIdFromFile(filePath, 100);
+                List<Integer> userIds = userService.readUserIdFromFile(filePath, 1000);
 
                 if (userIds == null || userIds.isEmpty()) {
                     System.out.println("No User ID found in the file.");
@@ -61,6 +64,7 @@ public class UserController {
 
                 // Fetch game data for the user IDs
                 userService.fetchGameData(userIds);
+
                 // Remove processed user IDs from the file
                 userService.removeUserIdFromFile(filePath, userIds.size());
                 System.out.println("Fetched game data for user IDs: " + userIds);
@@ -70,13 +74,17 @@ public class UserController {
         } else {
             System.out.println("Error: Unable to determine directory path.");
         }
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        System.out.println("total execution took (in api call) " + duration);
     }
 
 
     @PostMapping("/startKafkaConsumer")
-    public void startKafkaConsumer() {
+    public LocalDateTime startKafkaConsumer() {
         kafkaConsumer.startConsuming();
         System.out.println("Kafka consumer started.");
+        return LocalDateTime.now();
     }
 
     @PostMapping("/stopKafkaConsumer")

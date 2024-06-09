@@ -40,9 +40,6 @@ public class UserService {
         userIdFileReader.removeUserIds(filePath,count);
     }
     public void fetchGameData(List<Integer> userIds) {
-//        // Implement the logic to fetch game data for the given userId
-//        // Example:
-//        System.out.println("Fetching game data for user ID: " + userId);
         gameDataFetcher.fetchGameData(userIds);
 
     }

@@ -2,19 +2,19 @@ server:
   port: 8083
 spring:
   datasource:
-    url: jdbc:sqlserver://10.38.6.124:1433;databaseName=JG_Rummy_QA8;encrypt=true;trustServerCertificate=true
-    username: jwrdbadmin
-    password: Sc26uvhMMayX44VRAdGy
+    #jdbc:sqlserver://;serverName=10.38.6.253;databaseName=master
+    url: jdbc:sqlserver://10.38.6.47:1433;databaseName=JG_Rummy6;encrypt=true;trustServerCertificate=true
+    username: jg_uat_db_user
+    password: bWpUbQTBtK93rTUwBBAX
   data:
     mongodb:
-      uri: mongodb://jwrmongouser:1xVaz1iKrodBdXcZ@10.38.6.23:27017/qa8_game_fee_by_variant?authSource=admin&readPreference=secondaryPreferred&ssl=false&retryWrites=true&maxIdleTimeMS=5000
-
+      uri: mongodb://jwrmongouser:1xVaz1iKrodBdXcZ@10.38.6.23:27017/uat6_game_fee_by_variant?authSource=admin&readPreference=secondaryPreferred&ssl=false&retryWrites=true&maxIdleTimeMS=5000
   kafka:
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
+      topic: sqlToMongoMigration_2
     consumer:
       bootstrap-servers: localhost:9092
       group-id: user-data-group-id
@@ -24,8 +24,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
-
-
+      topic: sqlToMongoMigration_2
   jpa:
     hibernate:
       ddl-auto: none

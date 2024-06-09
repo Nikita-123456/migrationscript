@@ -1,4 +1,4 @@
-package com.migration.example.migrationscript;
+package com.migration.example.migrationscript.model;
 
 
 import org.springframework.data.annotation.Id;
@@ -23,6 +23,16 @@ public class UserData {
     private List<Double> KNOCKOUT;
     private Date createdAt;
     private Date updatedAt;
+
+    public UserData() {
+
+    }
+
+    public UserData(int userId) {
+        this.userId = userId;
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
 
     public int getUserId() {
         return userId;

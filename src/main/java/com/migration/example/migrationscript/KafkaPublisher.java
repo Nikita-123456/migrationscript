@@ -19,16 +19,27 @@
 
 package com.migration.example.migrationscript;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.migration.example.migrationscript.model.UserData;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.lang.Nullable;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 public class KafkaPublisher {
+
+    @Value("${spring.kafka.producer.topic}")
+    private String topicName;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     public KafkaPublisher(KafkaTemplate<String, String> kafkaTemplate) {
@@ -47,5 +58,14 @@ public class KafkaPublisher {
                         + message + "] due to : " + ex.getMessage());
             }
         });
+    }
+
+    public void publishToKafka(Map<Integer, UserData> userDataMap) {
+        for (UserData userData : userDataMap.values()) {
+            try {
+                publishToKafka(topicName, String.valueOf(userData.getUserId()), objectMapper.writeValueAsString(userData));
+            } catch (JsonProcessingException e) {
+            }
+        }
     }
 }
