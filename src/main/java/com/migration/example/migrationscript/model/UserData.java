@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "game_fee_by_variant_collection")
 public class UserData {
@@ -131,6 +132,8 @@ public class UserData {
         this.createdAt = createdAt;
     }
 
+
+
     public Date getUpdatedAt() {
         return updatedAt;
     }
@@ -138,4 +141,47 @@ public class UserData {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public String toString() {
+        return "UserData{" +
+                "userId=" + userId +
+                ", POINTS=" + POINTS +
+                ", POINTS21=" + POINTS21 +
+                ", POINTS10=" + POINTS10 +
+                ", POOL61=" + POOL61 +
+                ", POOL101=" + POOL101 +
+                ", POOL201=" + POOL201 +
+                ", POOL=" + POOL +
+                ", DEAL=" + DEAL +
+                ", DEALSNG=" + DEALSNG +
+                ", KNOCKOUT=" + KNOCKOUT +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
+
+
+    public boolean equalsIgnoringTimestamps(UserData other) {
+
+        System.out.println("Data other: " +other);
+
+        System.out.println("Data THIS: " +this);
+
+
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        return Objects.equals(userId, other.userId) &&
+                Objects.equals(POINTS, other.POINTS) &&
+                Objects.equals(POINTS21, other.POINTS21) &&
+                Objects.equals(POINTS10, other.POINTS10) &&
+                Objects.equals(POOL61, other.POOL61) &&
+                Objects.equals(POOL101, other.POOL101) &&
+                Objects.equals(POOL201, other.POOL201) &&
+                Objects.equals(POOL, other.POOL) &&
+                Objects.equals(DEAL, other.DEAL) &&
+                Objects.equals(DEALSNG, other.DEALSNG) &&
+                Objects.equals(KNOCKOUT, other.KNOCKOUT);
+    }
+
 }

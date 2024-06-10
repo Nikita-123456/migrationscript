@@ -1,10 +1,13 @@
 package com.migration.example.migrationscript;
 
 import com.migration.example.migrationscript.mongo.KafkaConsumer;
+import com.migration.example.migrationscript.mongo.KafkaConsumerConfig;
+import com.migration.example.migrationscript.mongo.KafkaConsumerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
@@ -14,12 +17,18 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 @RestController
 public class UserController {
 
+
     @Autowired
     private  UserService userService;
+
+
+    @Autowired
+    private KafkaConsumerFactory kafkaConsumerFactory;
 
     @Autowired
     private KafkaConsumer kafkaConsumer;
@@ -93,4 +102,14 @@ public class UserController {
         System.out.println("Kafka consumer stopped.");
     }
 
+    @GetMapping("/matchData")
+    public void getUserData(@RequestParam List<Integer> userIds) {
+        userService.dataFromSQLandMongo(userIds);
+    }
+
+    @PostMapping("/max-poll-records")
+    public String configureMaxPollRecords(@RequestParam int maxPollRecords) {
+        kafkaConsumerFactory.setMaxPollRecords(maxPollRecords);
+        return "Maximum poll records set to " + maxPollRecords;
+    }
 }

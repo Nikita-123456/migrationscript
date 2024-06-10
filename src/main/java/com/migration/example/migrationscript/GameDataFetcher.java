@@ -105,4 +105,22 @@ public class GameDataFetcher {
         }
     }
 
+    public Map<Integer, UserData>  fetchDataFromSQLAsPerUserId (List<Integer> userIds){
+        List<GameByVariant> list = gameByVariantRepository.findByUserIdIn(userIds);
+
+        Map<Integer, List<GameByVariant>> userGamePlayList = list.parallelStream()
+                .collect(Collectors.groupingBy(GameByVariant::getUserId));
+
+        ConcurrentMap<Integer, UserData> userDataMap = new ConcurrentHashMap<>();
+        // Process each group in parallel
+        userGamePlayList.entrySet().parallelStream()
+                .forEach(entry -> {
+                    int userId = entry.getKey();
+                    List<GameByVariant> variants = entry.getValue();
+                    UserData userData = userDataMap.computeIfAbsent(userId, UserData::new);
+                    variants.forEach(e -> addEntryFeeToUserData(userData, e.getGameVariant(), e.getEntryFee()));
+                });
+        return userDataMap;
+    }
+
 }
