@@ -164,9 +164,9 @@ public class UserData {
 
     public boolean equalsIgnoringTimestamps(UserData other) {
 
-        System.out.println("Data other: " +other);
-
-        System.out.println("Data THIS: " +this);
+//        System.out.println("Data other: " +other);
+//
+//        System.out.println("Data THIS: " +this);
 
 
         if (this == other) return true;

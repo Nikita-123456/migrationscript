@@ -2,7 +2,6 @@ server:
   port: 8083
 spring:
   datasource:
-    #jdbc:sqlserver://;serverName=10.38.6.253;databaseName=master
     url: jdbc:sqlserver://10.38.6.47:1433;databaseName=JG_Rummy6;encrypt=true;trustServerCertificate=true
     username: jg_uat_db_user
     password: bWpUbQTBtK93rTUwBBAX
@@ -14,17 +13,16 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      topic: sqlToMongoMigration_2
+      topic: sqlToMongoMigration_3
     consumer:
       bootstrap-servers: localhost:9092
       group-id: user-data-group-id
-      #max-poll-records: 500
       max-poll-interval-ms: 30000
       enable-auto-commit: true
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
-      topic: sqlToMongoMigration_2
+      topic: sqlToMongoMigration_3
   jpa:
     hibernate:
       ddl-auto: none
