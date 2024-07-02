@@ -1,5 +1,7 @@
-package com.migration.example.migrationscript;
+package com.migration.example.migrationscript.controller;
 
+import com.migration.example.migrationscript.UserService;
+import com.migration.example.migrationscript.migration.MigrationRunnable;
 import com.migration.example.migrationscript.mongo.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,15 +13,20 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class UserController {
-
+    private final static int THREAD_POOL_SIZE = 5;
+    private final static int BATCH_SIZE = 1000;
 
     @Autowired
-    private  UserService userService;
+    private UserService userService;
 
     @Autowired
     private KafkaConsumer kafkaConsumer;
@@ -79,6 +86,62 @@ public class UserController {
         System.out.println("total execution took (in api call) " + duration);
     }
 
+
+    @GetMapping("/fetchGameData2")
+    public LocalDateTime fetchGameData2() {
+        scheduleJob();
+        return LocalDateTime.now();
+    }
+
+    private void scheduleJob() {
+        ExecutorService executorService = Executors.newWorkStealingPool();
+        try {
+            while (true) {
+                long start = System.currentTimeMillis();
+                List<Integer> userIdList = userService.fetchAndRemoveUserIds(getFilePath(), BATCH_SIZE);
+                long end = System.currentTimeMillis();
+                System.out.println("Total Time Taken to write on Disk (in ms): " + (end-start));
+                if (userIdList.isEmpty()) {
+                    break;  // No more user IDs to process
+                }
+                executorService.submit(new MigrationRunnable(userIdList, userService));
+            }
+        } finally {
+            executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private void getUserIds(int count) {
+        List<Integer> userIdList = userService.fetchAndRemoveUserIds(getFilePath(), count);
+        int size = userService.fetchGameDataWithSize(userIdList);
+
+        if (userIdList.size() != size) {
+            System.out.println("Something went wrong in the current batch");
+            System.out.println(userIdList);
+        }
+    }
+
+    private String getFilePath() {
+        URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+        String directoryPath = null;
+        try {
+            directoryPath = Paths.get(url.toURI()).getParent().toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        String filename = "userids.txt";
+
+        return directoryPath + File.separator + filename;
+    }
 
     @PostMapping("/startKafkaConsumer")
     public LocalDateTime startKafkaConsumer() {

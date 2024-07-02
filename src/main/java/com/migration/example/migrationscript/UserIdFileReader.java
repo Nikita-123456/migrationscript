@@ -45,4 +45,39 @@ public class UserIdFileReader {
             e.printStackTrace();
         }
     }
+
+    public List<Integer> fetchAndRemoveUserIds(String filePath, int count) {
+        List<Integer> userIds = new ArrayList<>(count);
+        StringBuilder remainingLines = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int linesProcessed = 0;
+
+            while ((line = reader.readLine()) != null) {
+                if (linesProcessed < count) {
+                    try {
+                        userIds.add(Integer.parseInt(line.trim()));
+                        linesProcessed++;
+                    } catch (NumberFormatException e) {
+                        System.err.println("Skipping invalid line: " + line);
+                    }
+                } else {
+                    remainingLines.append(line).append(System.lineSeparator());
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write(remainingLines.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return userIds;
+    }
+
 }

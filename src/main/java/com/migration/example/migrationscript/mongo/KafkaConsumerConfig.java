@@ -30,7 +30,7 @@ public class KafkaConsumerConfig {
         prop.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_Servers);
         prop.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         prop.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        prop.put(ConsumerConfig.GROUP_ID_CONFIG, "batch1");
+        prop.put(ConsumerConfig.GROUP_ID_CONFIG, "batch1234");
         prop.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1000");
         prop.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "3000");
         prop.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");

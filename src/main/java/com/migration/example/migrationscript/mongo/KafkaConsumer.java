@@ -12,10 +12,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -29,19 +26,21 @@ public class KafkaConsumer {
     private static final String groupIdName1 = "user-data-group-id-11";
     ObjectMapper objectMapper = new ObjectMapper();
 
-    @KafkaListener(id = "aashish_sql_migration", topics = "${spring.kafka.consumer.topic}", concurrency = "2", autoStartup = "false")
+    @KafkaListener(id = "aashish_sql_migration5", topics = "${spring.kafka.consumer.topic}", concurrency = "2", autoStartup = "false")
     public void consume(@Payload List<String> message) {
         processMessage(message);
     }
 
     private void processMessage(List<String> messages) {
+//        System.out.println("Data Size: " + messages.size());
+
         long startTime = System.currentTimeMillis();
         List<UserData> dataList = messages.stream()
                                     .map(this::objectConversion)
                                     .filter(Objects::nonNull)
                                     .collect(Collectors.toList());
         List<UserData> outputList = mongoTemplate.insert(dataList, UserData.class).stream().toList();
-
+//            List<UserData> outputList = new ArrayList<>();
         if (outputList.size() == dataList.size()) {
             System.out.println("Batch Processed Successfully." );
 

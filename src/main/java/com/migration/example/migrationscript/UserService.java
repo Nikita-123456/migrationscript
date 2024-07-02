@@ -4,6 +4,7 @@ import com.migration.example.migrationscript.UserIdFileReader;
 import com.migration.example.migrationscript.UserIdFileWriter;
 import com.migration.example.migrationscript.model.UserData;
 import com.migration.example.migrationscript.mongo.MongoDataFetch;
+import org.springframework.asm.Handle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,6 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 public class UserService {
     @Autowired
-    private  DataSource dataSource;
-    @Autowired
     private  UserIdFileWriter userIdFileWriter;
     @Autowired
     private  UserIdFileReader userIdFileReader;
@@ -31,12 +30,12 @@ public class UserService {
 
 
     public void fetchDataAndStoreUserIds() {
-        try (Connection connection = dataSource.getConnection()) {
-            userIdFileWriter.fetchAndStoreUserIds(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle SQL exception
-        }
+//        try (Connection connection = dataSource.getConnection()) {
+            userIdFileWriter.fetchAndStoreUserIds();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//             Handle SQL exception
+//        }
     }
 
     public List<Integer> readUserIdFromFile(String filePath, int count) {
@@ -46,9 +45,17 @@ public class UserService {
     public void removeUserIdFromFile(String filePath,int count) {
         userIdFileReader.removeUserIds(filePath,count);
     }
+
+    public List<Integer> fetchAndRemoveUserIds(String filePath, int count) {
+        return userIdFileReader.fetchAndRemoveUserIds(filePath, count);
+    }
     public void fetchGameData(List<Integer> userIds) {
         gameDataFetcher.fetchGameData(userIds);
 
+    }
+
+    public int fetchGameDataWithSize(List<Integer> userIds) {
+        return gameDataFetcher.fetchGameDataWithSize(userIds);
     }
 
 //    public void dataFromMongo(List<Integer> userIds){

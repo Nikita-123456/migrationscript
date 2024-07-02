@@ -6,7 +6,7 @@ import com.migration.example.migrationscript.repository.GameByVariantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +16,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class GameDataFetcher {
-
-    @Autowired
-    private  DataSource dataSource;
 
     @Autowired
     private KafkaPublisher kafkaPublisher;
@@ -55,6 +52,38 @@ public class GameDataFetcher {
         endTime = System.currentTimeMillis();
         duration = endTime - startTime;
         System.out.println("execution took (in kafka event production) " + duration);
+
+    }
+
+    public int fetchGameDataWithSize(List<Integer> userIds) {
+        long start = System.currentTimeMillis();
+        if (userIds.isEmpty())
+            return 0;
+
+        long queryStart = System.currentTimeMillis();
+        List<GameByVariant> gameByVariantList = gameByVariantRepository.findByUserIdIn(userIds);
+        long queryEnd = System.currentTimeMillis();
+
+        System.out.println("Time Taken to Read from SQL only (in ms): " + (queryEnd - queryStart));
+
+        Map<Integer, List<GameByVariant>> userGamePlayList = gameByVariantList.parallelStream()
+                .collect(Collectors.groupingBy(GameByVariant::getUserId));
+
+        ConcurrentMap<Integer, UserData> userDataMap = new ConcurrentHashMap<>();
+        userGamePlayList.entrySet().parallelStream()
+                .forEach(entry -> {
+                    int userId = entry.getKey();
+                    List<GameByVariant> variants = entry.getValue();
+                    UserData userData = userDataMap.computeIfAbsent(userId, UserData::new);
+                    variants.forEach(e -> addEntryFeeToUserData(userData, e.getGameVariant(), e.getEntryFee()));
+                });
+
+        kafkaPublisher.publishToKafka(userDataMap);
+
+        long end = System.currentTimeMillis();
+        System.out.println("Total Time taken to read from SQL and Push to Kafka (in ms): " + (end - start));
+
+        return userDataMap.size();
 
     }
 
